@@ -33,7 +33,7 @@ let configSession={
     }
 }
 
-mongoose.connect('mongodb://127.0.0.1:27017/ecom')
+mongoose.connect('mongodb://127.0.0.1:27017/babubhai')
 .then(()=>{
     console.log("DB connected");
 })
@@ -57,16 +57,17 @@ app.set('view engine','ejs')
 app.set('views',path.join(__dirname,'views'))
 app.use(express.static(path.join(__dirname,'public')))
 
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use((req,res,next)=>{
+    console.log("line 62",req.user)
     res.locals.currentUser=req.user;
     res.locals.success=req.flash('success');
     res.locals.error=req.flash('error');
     next();
 })
 
-app.use(passport.initialize())
-app.use(passport.session())
 
 app.use(authRoute)
 
