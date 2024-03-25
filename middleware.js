@@ -22,7 +22,6 @@ const validateProduct=(req,res,next)=>{
     }
 }
 
-
 const validateReview=(req,res,next)=>{
     
     try{
@@ -41,8 +40,12 @@ const validateReview=(req,res,next)=>{
 }
 
 
+
 const isLoggedIn=(req,res,next)=>{
     try{
+        if(req.xhr && !req.isAuthenticated()){
+            res.error({msg:"You need to login first!"})
+        }
         if(!req.isAuthenticated()){
             
             req.flash('error','You need to login first')
@@ -75,9 +78,9 @@ const isProductAuthor= async(req,res,next)=>{
     let product=await Product.findById(id);
     if(product.author.equals(req.user._id)){
         req.flash('error','You are not the owner of this product');
-        return res.redirect(`/products`);
+        return res.redirect(`/products/${id}`);
     }
-    next
+    next();
 }
 
 module.exports={validateProduct,validateReview,isLoggedIn,isSeller,isProductAuthor}

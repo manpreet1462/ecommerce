@@ -11,17 +11,18 @@ const app=express();
 const productRoutes=require('./routes/product')
 const reviewRoute= require('./routes/review')
 const authRoute= require('./routes/auth')
-
+const cartRoute= require('./routes/cart')
 const path=require('path')
 const mongoose = require('mongoose');
 const seedDB=require('./seed')
 const methodOverride = require('method-override')
 const flash = require('connect-flash');
-
+const productApi=require('./routes/api/product-api')  //API
 const session = require('express-session');
 const passport = require('passport');    //passport
 const LocalStrategy = require('passport-local');     //passport
 const User = require('./models/User');     //passport
+const dotenv=require('dotenv').config();
 let configSession={
     secret: 'keyboard cat',
     resave: false,
@@ -33,7 +34,8 @@ let configSession={
     }
 }
 
-mongoose.connect('mongodb://127.0.0.1:27017/ecom')
+let url='mongodb+srv://manpreet274:1234@cluster0.z4ysecm.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0'
+mongoose.connect(url)
 .then(()=>{
     console.log("DB connected");
 })
@@ -58,6 +60,9 @@ app.set('views',path.join(__dirname,'views'))
 app.use(express.static(path.join(__dirname,'public')))
 
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use((req,res,next)=>{
     res.locals.currentUser=req.user;
     res.locals.success=req.flash('success');
@@ -65,15 +70,16 @@ app.use((req,res,next)=>{
     next();
 })
 
-app.use(passport.initialize())
-app.use(passport.session())
 
-app.use(authRoute)
-
+app.get('/',(req,res)=>{
+    res.render("home");
+})
+    
+app.use(authRoute)  
 app.use(productRoutes)
 app.use(reviewRoute)
-
-
+app.use(productApi);
+app.use(cartRoute);
 
 // use static serialize and deserialize of model for passport session support
 
@@ -85,8 +91,8 @@ passport.use(new LocalStrategy(User.authenticate()));  //passport
 
 
 
+// const port = process.env.PORT 
 
-
-app.listen(7000,()=>{
-    console.log("successfully listening at port 7000");
-})
+app.listen(7000 , () => {
+  console.log(`Successfully listening at port 7000`);
+});

@@ -2,6 +2,7 @@ const express=require('express');
 const Product = require('../models/Product');
 const Review = require('../models/Review');
 const { validateProduct,isLoggedIn, isSeller, isProductAuthor } = require('../middleware');
+const User = require('../models/User');
 //as in app.js we have app which is a big application and it cannot be export easily so we have mini application here which is k.a ROUTER
 const router=express.Router( )
 
@@ -79,14 +80,26 @@ router.patch('/products/:id',isLoggedIn,isSeller,isProductAuthor,async(req,res)=
     }
 })
 
+
+//for deleting the product
 router.delete('/products/:id',isLoggedIn,isSeller,isProductAuthor,async(req,res)=>{
     try{
         let {id}=req.params;
         let product=await Product.findById(id);
+         // Get all users who have this product in their cart
+         const usersWithProduct = await User.find({ cart: id });
+
         //deleting reviews before deleting product nhi to reviews ke collection mei reviews reh jayenge
         for(let ids of product.review){
             await Review.findByIdAndDelete(ids);
         }
+        // Update each user's cart to remove the product
+        const updatePromises = usersWithProduct.map(async (user) => {
+            user.cart = user.cart.filter(itemId => itemId.toString() !== id.toString());
+            await user.save();
+        });
+        await Promise.all(updatePromises);
+
         await Product.findByIdAndDelete(id)
         res.redirect('/products')
     }

@@ -4,12 +4,11 @@ const passport = require('passport');
 const router=express.Router( )
 
 
-
+// -------LOGOUT---------
 router.get('/logout',(req,res)=>{
     try{
         req.logout(()=>{
             req.flash('success','logged out successfully');
-
         })
         res.redirect('/login')
 
