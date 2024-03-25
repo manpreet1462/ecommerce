@@ -92,7 +92,7 @@ passport.use(new LocalStrategy(User.authenticate()));  //passport
 
 
 // const port = process.env.PORT 
-
-app.listen(7000 , () => {
-  console.log(`Successfully listening at port 7000`);
+console.log(process.env.PORT);
+app.listen(process.env.PORT , () => {
+  console.log(`Successfully listening at port ${process.env.PORT}`);
 });
